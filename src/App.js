@@ -3,9 +3,9 @@ import Comments from './Comments';
 
 function App() {
   return (
-    <div class="container">
-      <div class="row justify-content-start">
-        <div class="col">
+    <div className="container">
+      <div className="row justify-content-start">
+        <div className="col">
           <Comments />
         </div>
       </div>
