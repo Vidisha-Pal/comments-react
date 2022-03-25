@@ -1,34 +1,68 @@
-import React, { useEffect, useState , useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Comment from './Comment';
 
-let commentsList = [
-    { name: 'Sally', description: 'I really loved reading about your blog!' },
-    { name: 'Mary', description: 'Great work! Definitely inspired me to add more green to my place.' },
-    { name: 'Andrea', description: 'Thanks for the guide to buying houseplants for beginners.' }
-];
-
-
 function Comments() {
-    const commentsRef = useRef(null);
+    const commentsRef = useRef(null); 
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
 
 
     const addCommentHandler = () => {
-        if(commentsRef.current && commentsRef.current.value) { 
-            let updatedComments = comments;
-            updatedComments.push( { name: 'Wendy', description : commentsRef.current.value})
-            setComments([...comments] , updatedComments);   
+        if (commentsRef.current && commentsRef.current.value) {
+            const newComment = {
+                createdBy: 'Wendy',
+                description: commentsRef.current.value,
+                userId: 8
+            }
+            fetch("http://localhost:8010/comments", {
+                method: 'POST',
+                headers: new Headers({
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }),
+                body: JSON.stringify(newComment)
+            }).then(response => response.json())
+                .then(data => {
+                    let updatedComments = comments;
+                    updatedComments.push(data)
+                    setComments([...comments], updatedComments);
+                    console.log(comments);
+                    setLoading(false);
+                    setError(null);
+                }).catch(error => {
+                    console.error(error);
+                    setLoading(false);
+                    setError('Something went wrong, please try again later.');
+                });
         }
     }
 
     useEffect(() => {
-        setComments(commentsList);
         setLoading(false);
+        getCommentsAPI();
     }, []);
 
+    const getCommentsAPI = async () => {
+        fetch("http://localhost:8010/comments", {
+            method: 'GET',
+            headers: new Headers({
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            })
+        }).then(response => response.json())
+            .then(data => {
+                setComments(data);
+                setLoading(false);
+                setError(null);
+            }).catch(error => {
+                console.error(error);
+                setLoading(false);
+                setError('Something went wrong, please try again later.');
+            });
+    }
 
-    
 
     return (
         <>
@@ -52,9 +86,9 @@ function Comments() {
             <div className="container">
                 <div className="row justify-content-start">
                     <div className="col xl-2 lg-2 md-3 sm-4 xs-4">
-                        <textarea 
-                            className="form-control" 
-                            placeholder="Leave a comment here" 
+                        <textarea
+                            className="form-control"
+                            placeholder="Leave a comment here"
                             ref={commentsRef}>
                         </textarea>
                     </div>
@@ -63,17 +97,25 @@ function Comments() {
                     </div>
                     <div className="col xl-10 lg-10 md-10 sm-6 xs-6"></div>
                 </div>
-
             </div>
-            
+
             <br />
-            {loading ? 
-           
-            <div className="spinner-border" role="status">
-                <span className="sr-only">Loading...</span>
+            {!loading && !error && comments && comments.length > 0 && comments.map((comment, index) => <Comment key={index} name={comment.createdBy} description={comment.description} />)}
+            {!loading && error &&
+            <div className="container">
+                <div className="row justify-content-start">
+                    <div className="col xl-2 lg-2 md-3 sm-4 xs-4">
+                        <div className="alert alert-danger" role="alert">
+                            {error}
+                        </div>
+                    </div>
+                </div>
             </div>
-            :  comments && comments.length> 0 && comments.map((comment, index) => <Comment key={index} name={comment.name} description={comment.description} />)}
-
+                
+            }
+            <br />
+            <a href="#"> Back to top </a>
+            <br />
         </>
     )
 }
