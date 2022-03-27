@@ -7,8 +7,6 @@ function Comments() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
-
     const addCommentHandler = () => {
         if (commentsRef.current && commentsRef.current.value) {
             const newComment = {
@@ -100,7 +98,6 @@ function Comments() {
             </div>
 
             <br />
-            {!loading && !error && comments && comments.length > 0 && comments.map((comment, index) => <Comment key={index} name={comment.createdBy} description={comment.description} />)}
             {!loading && error &&
             <div className="container">
                 <div className="row justify-content-start">
@@ -110,9 +107,9 @@ function Comments() {
                         </div>
                     </div>
                 </div>
-            </div>
-                
+            </div>   
             }
+            {!loading && !error && comments && comments.length > 0 && comments.map((comment, index) => <Comment key={index} name={comment.createdBy} description={comment.description} />)}
             <br />
             <a href="#"> Back to top </a>
             <br />
